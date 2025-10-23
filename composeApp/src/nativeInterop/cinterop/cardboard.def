@@ -1,0 +1,20 @@
+# See iosApp/setup.sh for instructions on how to set up the Cardboard SDK for iOS.
+
+headers = cardboard.h
+headerFilter = cardboard.h
+package = cardboard.native
+language = C
+depends = posix
+
+#staticLibraries = libGfxPluginCardboard.a
+#libraryPaths = ../cardboard/build/Release-iphoneos ../cardboard/build/Release-iphonesimulator
+
+compilerOpts.ios_x64 = -I ../cardboard/sdk/include/
+compilerOpts.ios_arm64 = -I ../cardboard/sdk/include/
+compilerOpts.ios_simulator_x64 = -I ../cardboard/sdk/include/
+compilerOpts.ios_simulator_arm64 = -I ../cardboard/sdk/include/
+
+linkerOpts.ios_x64 = -L../cardboard/build/Release-iphoneos -lGfxPluginCardboard
+linkerOpts.ios_arm64 = -L../cardboard/build/Release-iphoneos -lGfxPluginCardboard
+linkerOpts.ios_simulator_x64 = -L../cardboard/build/Release-iphonesimulator -lGfxPluginCardboard
+linkerOpts.ios_simulator_arm64 = -L../cardboard/build/Release-iphonesimulator -lGfxPluginCardboard

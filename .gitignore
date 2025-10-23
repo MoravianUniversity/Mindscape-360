@@ -1,0 +1,30 @@
+*.iml
+.kotlin
+.gradle
+**/build/
+xcuserdata
+!src/**/build/
+local.properties
+.idea
+.DS_Store
+captures
+.externalNativeBuild
+.cxx
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+!*.xcodeproj/xcshareddata/
+!*.xcodeproj/project.xcworkspace/
+!*.xcworkspace/contents.xcworkspacedata
+**/xcshareddata/WorkspaceSettings.xcsettings
+# Gradle cache and wrapper logs
+.gradle/
+*.log
+
+# OS junk files
+Thumbs.db
+
+# Temporary or backup files
+*.tmp
+*.bak
+*.orig
+

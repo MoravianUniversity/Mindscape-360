@@ -1,0 +1,19 @@
+# Adds support for overriding the observeValueForKeyPath function in NSObjects
+# This is necessary to implement KVO (Key-Value Observing) in Objective-C with Kotlin
+# This file needs to be included in the Gradle cinterop configuration:
+#         iosTarget.compilations["main"].cinterops {
+#             val nskvoprotocol by creating
+#         }
+
+package = platform.FoundationCompat
+language = Objective-C
+---
+#import <Foundation/Foundation.h>
+
+@protocol NSKVObserver
+@required
+- (void) observeValueForKeyPath:(NSString *)keyPath
+    ofObject:(id)object
+    change:(NSDictionary<NSKeyValueChangeKey, id> *)change
+    context:(void *)context;
+@end;
