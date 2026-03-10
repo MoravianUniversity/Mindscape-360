@@ -25,6 +25,7 @@ import org.jetbrains.compose.resources.painterResource
 import vrapp.composeapp.generated.resources.Res
 import vrapp.composeapp.generated.resources.arrow_back
 
+
 @Composable
 fun AboutScreen() {
     Box(
