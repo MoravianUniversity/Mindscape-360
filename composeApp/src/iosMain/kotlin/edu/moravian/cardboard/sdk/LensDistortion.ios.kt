@@ -57,18 +57,18 @@ class IosLensDistortion(
     override fun getEyeFromHeadMatrix(eye: Eye, matrix: FloatArray) {
         check(nativePointer != null) { "LensDistortion is disposed." }
         require(matrix.size >= 16) { "Matrix array must have at least 16 elements." }
-//        matrix.usePinned { matrix ->
-//            CardboardLensDistortion_getEyeFromHeadMatrix(
-//                nativePointer,
-//                eye.value.toUInt().convert(),
-//                matrix.addressOf(0)
-//            )
-//        }
+        matrix.usePinned { matrix ->
+            CardboardLensDistortion_getEyeFromHeadMatrix(
+                nativePointer,
+                eye.value.toUInt().convert(),
+                matrix.addressOf(0)
+            )
+        }
     }
 
     override fun destroy() {
         if (nativePointer != null) {
-//            CardboardLensDistortion_destroy(nativePointer)
+            CardboardLensDistortion_destroy(nativePointer)
             nativePointer = null
         }
     }
@@ -77,10 +77,10 @@ class IosLensDistortion(
         check(nativePointer != null) { "LensDistortion is disposed." }
         require(matrix.size >= 16) { "Matrix array must have at least 16 elements." }
         matrix.usePinned { matrix ->
-//            CardboardLensDistortion_getProjectionMatrix(
-//                nativePointer, eye.value.toUInt(), zNear, zFar,
-//                matrix.addressOf(0)
-//            )
+            CardboardLensDistortion_getProjectionMatrix(
+                nativePointer, eye.value.toUInt(), zNear, zFar,
+                matrix.addressOf(0)
+            )
         }
     }
 
@@ -88,10 +88,10 @@ class IosLensDistortion(
         check(nativePointer != null) { "CardboardLensDistortion is disposed." }
         require(fov.size >= 4) { "FOV array must have at least 4 elements." }
         fov.usePinned { matrix ->
-//            CardboardLensDistortion_getFieldOfView(
-//                nativePointer, eye.value.toUInt(),
-//                matrix.addressOf(0)
-//            )
+            CardboardLensDistortion_getFieldOfView(
+                nativePointer, eye.value.toUInt(),
+                matrix.addressOf(0)
+            )
         }
     }
 
@@ -99,6 +99,7 @@ class IosLensDistortion(
         check(nativePointer != null) { "CardboardLensDistortion is disposed." }
         memScoped {
             val nativeMesh = alloc<CardboardMesh>()
+            // TODO: causes a compile error, however, this function is not currently used anywhere
 //            CardboardLensDistortion_getDistortionMesh(
 //                nativePointer,
 //                eye.value.toUInt(),
@@ -130,11 +131,6 @@ class IosLensDistortion(
     override fun distortedUvForUndistortedUv(undistortedUv: UV, eye: Eye): UV {
         check(nativePointer != null) { "CardboardLensDistortion is disposed." }
         memScoped {
-            //       public final external fun CardboardLensDistortion_distortedUvForUndistortedUv(
-            //       lens_distortion: kotlinx/cinterop/CValuesRef<cnames/structs/CardboardLensDistortion>?,
-            //       undistorted_uv: kotlinx/cinterop/CValuesRef<cardboard/native/CardboardUv>?,
-            //       eye: kotlin/UInt /* = cardboard/native/CardboardEye^ */
-            //       ): kotlinx/cinterop/CValue<cardboard/native/CardboardUv>
             val cUndistortedUv: CValue<CardboardUv> = toNative(undistortedUv).reinterpret()
             return CardboardLensDistortion_distortedUvForUndistortedUv(
                 nativePointer,

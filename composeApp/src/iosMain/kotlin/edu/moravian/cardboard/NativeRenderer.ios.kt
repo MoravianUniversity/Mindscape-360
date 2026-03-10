@@ -26,6 +26,7 @@ import platform.Foundation.create
 import platform.Foundation.dataWithContentsOfURL
 import platform.Metal.*
 import platform.UIKit.UIImage
+import platform.QuartzCore.CACurrentMediaTime
 
 actual fun createDefaultNativeRenderer(): NativeRenderer = IosMetalNativeRenderer()
 
@@ -175,8 +176,8 @@ class IosMetalNativeRenderer: NativeRenderer {
 
     private inner class MetalMesh(
         val vertices: MTLBufferProtocol,
-        val normals: MTLBufferProtocol?,
-        val uvs: MTLBufferProtocol?,
+        val normals: MTLBufferProtocol? = null,
+        val uvs: MTLBufferProtocol? = null,
         val indices: MTLBufferProtocol,
         val verticesIndex: ULong = attribs[ATTR_POSITION]!!,
         val normalsIndex: ULong? = if (normals !== null) attribs[ATTR_NORMAL] else null,
@@ -208,7 +209,7 @@ class IosMetalNativeRenderer: NativeRenderer {
     override fun loadTexture(url: String, flip: Boolean): NativeTexture {
         val url = NSURL(string=url)
         var image = if (url.scheme == "file") { url.path?.let { UIImage.imageWithContentsOfFile(it) } }
-                    else { NSData.dataWithContentsOfURL(url)?.let { UIImage.imageWithData(it) } }
+        else { NSData.dataWithContentsOfURL(url)?.let { UIImage.imageWithData(it) } }
         return loadTexture(image ?: error("Failed to load texture from URL: $url"), flip)
     }
 
@@ -257,7 +258,7 @@ class IosMetalNativeRenderer: NativeRenderer {
     @OptIn(ExperimentalForeignApi::class)
     private fun loadTexture(data: CPointer<ByteVar>, width: ULong, height: ULong) =
         MetalTexture(device!!.loadTexture(data, width, height))
-        // TODO: generate mipmaps for the texture
+    // TODO: generate mipmaps for the texture
 //        MetalTexture(device!!.loadTexture(data, width, height, true).also { texture ->
 //            commandQueue?.commandBuffer()?.blitCommandEncoder()?.apply {
 //                generateMipmapsForTexture(texture)
@@ -302,8 +303,9 @@ class IosMetalNativeRenderer: NativeRenderer {
                 val item = player.currentItem ?: error("Player current item is null")
                 val time = item.currentTime()
                 if (output === null) {
-                    if (item.status != AVPlayerItemStatusReadyToPlay) {
-                        // wait for item to be ready (still need to set ST matrix though)
+                    if (item.status == AVPlayerItemStatusFailed) { error("Player item failed to load") }
+                    val curTime = time.useContents { value.toDouble() / timescale }
+                    if (item.status != AVPlayerItemStatusReadyToPlay || curTime < 0.1) {
                         if (uniformSTMatrix !== null) { setVertexUniform(stMatrix.m, uniformSTMatrix) }
                         return
                     }
@@ -314,13 +316,16 @@ class IosMetalNativeRenderer: NativeRenderer {
                     output = AVPlayerItemVideoOutput(pixelBufferAttributes=settings).also { item.addOutput(it) }
                 }
                 val output = output!!
-                if (output.hasNewPixelBufferForItemTime(time)) {
-                    val buffer = output.copyPixelBufferForItemTime(time, null) ?: error("Failed to copy pixel buffer")
-                    texture = try { textureCache.createTextureFromImage(buffer, matrix=stMatrix.m) } finally { CVBufferRelease(buffer) }
+                val outputTime = output.itemTimeForHostTime(CACurrentMediaTime())
+                val buffer = output.copyPixelBufferForItemTime(outputTime, null)
+                if (buffer != null) {
+                    texture = try {
+                        textureCache.createTextureFromImage(buffer, matrix=stMatrix.m)
+                    } finally {
+                        CVBufferRelease(buffer)
+                    }
                 }
-                if (texture !== null) {
-                    setFragmentTexture(texture, index)
-                } //else { time.useContents { println("MetalTextureVideo: No pixel buffer yet, time: ${value.toDouble() / timescale}") } }
+                if (texture !== null) { setFragmentTexture(texture, index) }
                 if (uniformSTMatrix !== null) { setVertexUniform(stMatrix.m, uniformSTMatrix) }
             }
         }

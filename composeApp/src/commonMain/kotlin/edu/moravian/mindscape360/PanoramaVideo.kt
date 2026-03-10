@@ -50,7 +50,7 @@ import edu.moravian.mindscape360.sphere
 class PanoramaVideo(
     view: NativeRenderView,
     val player: MediaPlayer,
-    mesh: Mesh = sphere(5f), //dome(5.0f),
+    mesh: Mesh = sphere(5.0f), //dome(5.0f),
     floorHeight: Float = -1.7f,  // approximate height of the floor in meters
     params: CardboardRendererParams = CardboardRendererParams(),
     native: NativeRenderer = createDefaultNativeRenderer(),

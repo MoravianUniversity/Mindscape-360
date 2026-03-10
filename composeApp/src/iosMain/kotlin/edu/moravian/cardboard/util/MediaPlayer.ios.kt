@@ -23,6 +23,9 @@ class IosMediaPlayer(
     @OptIn(ExperimentalForeignApi::class)
     private val statusObserver = createKVObserver<AVPlayerStatus>(native, "status") { old, new ->
         if (new == AVPlayerStatusReadyToPlay) {
+            println("Media player is ready to play media")
+            println("Player description: ${native.description}")
+            println("Player Item: ${native.currentItem?.status} ${native.currentItem?.description}")
             if (_state == MediaPlayerState.LOADING) {
                 if (autostart) {
                     native.play()
@@ -32,8 +35,10 @@ class IosMediaPlayer(
                 }
             }
         } else if (new == AVPlayerStatusFailed) {
+            println("Media player failed to load media: ${native.error?.localizedDescription}")
             destroy()
         } else if (new == AVPlayerStatusUnknown) {
+            println("Media player status is unknown/idle")
             _state = MediaPlayerState.IDLE
         }
     }.apply { enable() }

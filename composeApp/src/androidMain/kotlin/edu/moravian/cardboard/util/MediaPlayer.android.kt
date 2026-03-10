@@ -72,18 +72,27 @@ class AndroidMediaPlayer(private val context: Context) : MediaPlayer {
     override fun load(url: String, repeat: Boolean) {
         handler.runOrPost {
             if (_state != AMPS.IDLE) {
-                native.reset()
+                try {
+                    native.reset()
+                } catch (e: IllegalStateException) {
+                    // ignore
+                }
                 _state = AMPS.IDLE
             }
             val uri = url.toUri()
-            if (uri.scheme == ContentResolver.SCHEME_FILE) {
-                native.setDataSource(uri.path)
-            } else if (uri.scheme == "asset") {
-                val fd = context.assets.openFd(uri.path!!.removePrefix("/"))
-                native.setDataSource(fd)
-                fd.close()
-            } else {
-                native.setDataSource(context, uri)
+            try {
+                if (uri.scheme == ContentResolver.SCHEME_FILE) {
+                    native.setDataSource(uri.path)
+                } else if (uri.scheme == "asset") {
+                    val fd = context.assets.openFd(uri.path!!.removePrefix("/"))
+                    native.setDataSource(fd)
+                    fd.close()
+                } else {
+                    native.setDataSource(context, uri)
+                }
+            } catch (e: IllegalStateException) {
+                _state = AMPS.ERROR
+                return@runOrPost
             }
             _state = AMPS.INITIALIZED
             native.isLooping = repeat

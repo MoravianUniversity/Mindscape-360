@@ -323,8 +323,6 @@ private fun VRPlayerContent(videoUrl: String, onBack: () -> Unit) {
         PanoramaVideo(
             view = renderView,
             player = mediaPlayer,
-            mesh = sphere(5f),
-            floorHeight = -1.7f
         )
     }
 

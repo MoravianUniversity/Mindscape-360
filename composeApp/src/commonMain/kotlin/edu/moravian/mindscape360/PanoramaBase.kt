@@ -42,9 +42,7 @@ open class PanoramaBase(
         )
         native.setModelViewMatrix(mvpDome)
         if (texture != null) {
-            println("Binding texture")
             texture?.bind()
-            println("Drawing dome")
             dome?.draw()
         }
     }

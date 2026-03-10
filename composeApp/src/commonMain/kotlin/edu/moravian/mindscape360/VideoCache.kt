@@ -32,6 +32,11 @@ private val VIDEO_TTL = 30.days // Images expire after 30 days
  * Try to get cached video URI, but return original URL if caching fails.
  */
 suspend fun getVideoPath(url: String, refresh: Boolean = false, videoReadyToStream: (String) -> Unit) {
+//    videoReadyToStream(url)
+//    return
+
+    //val url = url.replace(".mp4", ".mov")
+
     if (!refresh && url in videoUriCache) {
         // Cached and accessed this application session
         println("Video URI cache hit: $url")
@@ -60,19 +65,20 @@ suspend fun getVideoPath(url: String, refresh: Boolean = false, videoReadyToStre
         val completed = downloadVideoWithRetry(url, tempPath) { offset, received, total, elapsed ->
             if (!calledReadyToStream) {
                 // Compute number of ms remaining (or null if unknown)
-                val eta = if (total > 0) {
-                    val rate = received.toDouble() / elapsed.inWholeMilliseconds.toDouble() // bytes per ms
-                    val remaining = total - received
-                    if (rate > 0 && remaining >= 0) { (remaining / rate).toLong() } else { null }
-                } else { null }
-
-                if (
-                    (/*eta == null &&*/ (offset + received) > 40*(1024*1024)) //||
-                // (eta != null && eta < 15_000L) // TODO: use eta and how much has been downloaded
-                ) {
-                    calledReadyToStream = true
-                    videoReadyToStream("$uri.temp")
-                }
+                // TODO: fix on iOS (crashes)
+//                val eta = if (total > 0) {
+//                    val rate = received.toDouble() / elapsed.inWholeMilliseconds.toDouble() // bytes per ms
+//                    val remaining = total - received
+//                    if (rate > 0 && remaining >= 0) { (remaining / rate).toLong() } else { null }
+//                } else { null }
+//
+//                if (
+//                    (/*eta == null &&*/ (offset + received) > 40*(1024*1024)) //||
+//                // (eta != null && eta < 15_000L) // TODO: use eta and how much has been downloaded
+//                ) {
+//                    calledReadyToStream = true
+//                    videoReadyToStream("$uri.temp")
+//                }
             }
         }
         if (completed) {

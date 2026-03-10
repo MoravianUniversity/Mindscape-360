@@ -94,8 +94,12 @@ open class CardboardRenderer(
         // Check for device parameters existence in external storage. If they're
         // missing, we must scan a Cardboard QR code and save the obtained parameters.
         if (!QrCode.hasSavedDeviceParams) {
+            println("Device parameters not found, scanning QR code...")
             QrCode.scanQrCodeAndSaveDeviceParams()
             //QrCode.saveDeviceParams(DUMMY_PARAMS_URI)
+        } else {
+            //QrCode.saveDeviceParams(DUMMY_PARAMS_URI)
+            println("Device parameters saved: ${QrCode.savedDeviceParams.contentToString()}")
         }
     }
     override fun onDraw() {
