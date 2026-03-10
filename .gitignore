@@ -28,3 +28,4 @@ Thumbs.db
 *.bak
 *.orig
 
+/composeApp/release/composeApp-release.aab
