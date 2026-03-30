@@ -103,8 +103,8 @@ android {
         applicationId = "edu.moravian.mindscape360"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 2  // has to be increased every time you upload a new version to the Play Store
-        versionName = "1.0"
+        versionCode = 3  // has to be increased every time you upload a new version to the Play Store
+        versionName = "1.0.1"
         ndk {  // **ADDED**
             //noinspection ChromeOsAbiSupport
             abiFilters += "armeabi-v7a"
