@@ -32,15 +32,20 @@ std::atomic<int32_t> deviceParamsChangedCount = {0};
 
 void incrementDeviceParamsChangedCount() { std::atomic_fetch_add(&deviceParamsChangedCount, 1); }
 
+UIViewController *getPresentingViewController() {
+    UIViewController *presentingViewController = nil;
+    presentingViewController = [UIApplication sharedApplication].keyWindow.rootViewController;
+    while (presentingViewController.presentedViewController) {
+      presentingViewController = presentingViewController.presentedViewController;
+    }
+    if (presentingViewController.isBeingDismissed) {
+      presentingViewController = presentingViewController.presentingViewController;
+    }
+    return presentingViewController;
+}
+
 void showQRScanViewController() {
-  UIViewController *presentingViewController = nil;
-  presentingViewController = [UIApplication sharedApplication].keyWindow.rootViewController;
-  while (presentingViewController.presentedViewController) {
-    presentingViewController = presentingViewController.presentedViewController;
-  }
-  if (presentingViewController.isBeingDismissed) {
-    presentingViewController = presentingViewController.presentingViewController;
-  }
+  UIViewController *presentingViewController = getPresentingViewController();
 
   __block CardboardQRScanViewController *qrViewController =
       [[CardboardQRScanViewController alloc] initWithCompletion:^(BOOL /*succeeded*/) {
@@ -53,8 +58,35 @@ void showQRScanViewController() {
 }
 
 void requestPermissionInSettings() {
-  NSURL *settingURL = [NSURL URLWithString:UIApplicationOpenSettingsURLString];
-  [UIApplication.sharedApplication openURL:settingURL options:@{} completionHandler:nil];
+    UIViewController *presentingViewController = getPresentingViewController();
+
+    // Show an alert that the camera is required
+    UIAlertController *alert = [UIAlertController
+                                alertControllerWithTitle:@"Camera Required"
+                                message:@"The camera is required to scan QR codes to configure for your headset. Press 'Enable in Settings' to enable the camera for this app. Press 'Use Defaults' to use the default headset configuration which may or may not work correctly."
+                                preferredStyle:UIAlertControllerStyleAlert];
+    UIAlertAction *enable = [UIAlertAction
+                             actionWithTitle:@"Enable in Settings"
+                             style:UIAlertActionStyleDefault
+                             handler:^(UIAlertAction * action) {
+        // Open settings
+        NSURL *settingURL = [NSURL URLWithString:UIApplicationOpenSettingsURLString];
+        [UIApplication.sharedApplication openURL:settingURL options:@{} completionHandler:nil];
+    }];
+    [alert addAction:enable];
+    UIAlertAction *cancel = [UIAlertAction
+                             actionWithTitle:@"Use Defaults"
+                             style:UIAlertActionStyleCancel
+                             handler:^(UIAlertAction * action) {
+        // Set defaults
+        NSData *deviceParams = [CardboardDeviceParamsHelper readSerializedDeviceParams];
+        if (deviceParams.length == 0) {
+          [CardboardDeviceParamsHelper saveCardboardV1Params];
+        }
+        incrementDeviceParamsChangedCount();
+    }];
+    [alert addAction:cancel];
+    [presentingViewController presentViewController:alert animated:YES completion:nil];
 }
 
 void prerequestCameraPermissionForQRScan() {

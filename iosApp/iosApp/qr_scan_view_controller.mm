@@ -299,7 +299,6 @@ static const CGFloat kGuidanceHeight = 116.0f;
 }
 
 - (void)skipAndClose {
-  NSLog(@" skipAndClose called!");
   [self finishCapture];
   NSData *deviceParams = [CardboardDeviceParamsHelper readSerializedDeviceParams];
 
@@ -308,9 +307,7 @@ static const CGFloat kGuidanceHeight = 116.0f;
     [CardboardDeviceParamsHelper saveCardboardV1Params];
   }
 
-  NSLog(@"About to call completion");
   _completion(YES);
-  NSLog(@"Completion called");
 }
 
 - (void)finishCapture {
