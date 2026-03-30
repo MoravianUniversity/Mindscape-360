@@ -7,3 +7,5 @@ actual fun filePathToUri(filePath: String): String {
     return File(filePath).toURI().toString()
     // Returns: "file:///data/data/vr.app/files/video_12345.mp4"
 }
+
+actual fun shouldStreamEarly() = true

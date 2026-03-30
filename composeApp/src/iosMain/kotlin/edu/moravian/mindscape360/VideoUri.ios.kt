@@ -5,3 +5,5 @@ actual fun filePathToUri(filePath: String): String {
     return "file://$filePath"
     // Returns: "file:///var/mobile/.../Documents/video_12345.mp4"
 }
+
+actual fun shouldStreamEarly() = false

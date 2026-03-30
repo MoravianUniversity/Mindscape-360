@@ -65,20 +65,20 @@ suspend fun getVideoPath(url: String, refresh: Boolean = false, videoReadyToStre
         val completed = downloadVideoWithRetry(url, tempPath) { offset, received, total, elapsed ->
             if (!calledReadyToStream) {
                 // Compute number of ms remaining (or null if unknown)
-                // TODO: fix on iOS (crashes)
+                // TODO: fix on iOS (crashes - uses shouldStreamEarly() which returns false on iOS to suppress for the moment
 //                val eta = if (total > 0) {
 //                    val rate = received.toDouble() / elapsed.inWholeMilliseconds.toDouble() // bytes per ms
 //                    val remaining = total - received
 //                    if (rate > 0 && remaining >= 0) { (remaining / rate).toLong() } else { null }
 //                } else { null }
 //
-//                if (
-//                    (/*eta == null &&*/ (offset + received) > 40*(1024*1024)) //||
-//                // (eta != null && eta < 15_000L) // TODO: use eta and how much has been downloaded
-//                ) {
-//                    calledReadyToStream = true
-//                    videoReadyToStream("$uri.temp")
-//                }
+                if (shouldStreamEarly() &&
+                    (/*eta == null &&*/ (offset + received) > 64*(1024*1024)) //||
+                // (eta != null && eta < 15_000L) // TODO: use eta and how much has been downloaded
+                ) {
+                    calledReadyToStream = true
+                    videoReadyToStream("$uri.temp")
+                }
             }
         }
         if (completed) {
@@ -95,6 +95,8 @@ suspend fun getVideoPath(url: String, refresh: Boolean = false, videoReadyToStre
         }
     }
 }
+
+expect fun shouldStreamEarly(): Boolean
 
 /**
  * Download video file with retries on failure.
