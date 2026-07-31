@@ -10,10 +10,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -24,8 +24,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
@@ -40,11 +41,11 @@ import org.jetbrains.compose.resources.painterResource
 import vrapp.composeapp.generated.resources.Res
 import vrapp.composeapp.generated.resources.logo
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withLink
 
 @Composable
 fun WelcomeScreen() {
     val appContent = getWelcomeContent()
-    val uriHandler = LocalUriHandler.current
 
     Image(
         painter = painterResource(Res.drawable.logo),
@@ -85,20 +86,25 @@ fun WelcomeScreen() {
                         append("$instruction\n")
                     }
                     append("\nNeed help? Watch the quick start ")
-                    pushStringAnnotation(tag = "URL", annotation = "https://www.youtube.com/shorts/9TFiNWiEghk")
-                    withStyle(style = SpanStyle(
-                        color = Color(0xFF0D47A1),
-                        fontWeight = FontWeight.Bold,
-                        textDecoration = TextDecoration.Underline,
-                        fontStyle = FontStyle.Italic
-                    )) {
+                    withLink(
+                        LinkAnnotation.Url(
+                            url = "https://www.youtube.com/shorts/9TFiNWiEghk",
+                            styles = TextLinkStyles(
+                                style = SpanStyle(
+                                    color = Color(0xFF0D47A1),
+                                    fontWeight = FontWeight.Bold,
+                                    textDecoration = TextDecoration.Underline,
+                                    fontStyle = FontStyle.Italic
+                                )
+                            )
+                        )
+                    ) {
                         append("video")
                     }
-                    pop()
                     append("\n")
                 }
 
-                ClickableText(
+                Text(
                     text = annotatedText,
                     style = TextStyle(
                         fontSize = 17.sp,
@@ -108,10 +114,6 @@ fun WelcomeScreen() {
                     modifier = Modifier
                         .widthIn(max = 400.dp)
                         .wrapContentHeight(),
-                    onClick = { offset ->
-                        annotatedText.getStringAnnotations(tag = "URL", start = offset, end = offset)
-                            .firstOrNull()?.let { uriHandler.openUri(it.item) }
-                    }
                 )
 
                 ElevatedButton(
@@ -124,7 +126,7 @@ fun WelcomeScreen() {
                         contentColor = MaterialTheme.colorScheme.onPrimary
                     )
                 ) {
-                    androidx.compose.material3.Text(appContent.buttonText, fontSize = 20.sp)
+                    Text(appContent.buttonText, fontSize = 20.sp)
                 }
             }
         }
